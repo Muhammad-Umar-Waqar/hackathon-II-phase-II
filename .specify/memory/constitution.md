@@ -1,55 +1,54 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+Version change: N/A initial version → 1.0.0
+Added sections: All principles and governance sections
+Removed sections: None
+Templates requiring updates: N/A (initial constitution)
+Follow-up TODOs: None
+-->
+# Hackathon 2 Phase 2 Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Rapid Prototyping
+Focus on building functional prototypes quickly with MVP mindset; Prioritize core features over perfection; Embrace iterative development and early validation.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Collaborative Innovation
+Share knowledge and resources freely among team members; Encourage cross-functional collaboration and peer learning; Leverage collective expertise to overcome technical challenges.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Solution-Oriented Approach
+Define clear problems before implementing solutions; Focus on user impact and practical value; Validate assumptions early through prototyping and testing.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Technical Excellence
+Write clean, maintainable code despite time constraints; Implement proper error handling and edge case considerations; Balance speed with quality to ensure functional deliverables.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Ethical Development
+Respect intellectual property rights and avoid plagiarism; Ensure solutions are ethical and socially responsible; Maintain transparency in development practices.
 
-### [PRINCIPLE_6_NAME]
+### VI. Continuous Learning
+Embrace experimentation with new technologies and approaches; Document lessons learned and technical decisions; Adapt strategies based on feedback and emerging insights.
 
+## Hackathon Constraints
 
-[PRINCIPLE__DESCRIPTION]
+### Time Management
+Adhere to phase deadlines and milestone checkpoints; Prioritize tasks based on impact and feasibility; Communicate proactively about potential delays or roadblocks.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### Resource Utilization
+Leverage available tools, frameworks, and cloud resources efficiently; Optimize for cost-effectiveness while maintaining performance; Reuse existing components when appropriate.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Development Workflow
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Code Quality Standards
+Maintain readable code with essential documentation; Conduct peer reviews for critical components; Follow consistent coding conventions and naming standards.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Version Control
+Commit frequently with descriptive messages; Use feature branches for major implementations; Maintain a stable main branch for deliverables.
+
+### Testing Strategy
+Implement unit tests for core functionality; Perform integration testing for critical workflows; Validate user interfaces and user experience flows.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution guides all development activities for the hackathon project. All team members are expected to adhere to these principles. Deviations require explicit justification and team consensus. Regular check-ins will assess compliance and address conflicts. Amendments to this constitution require majority approval from team participants.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-02-15 | **Last Amended**: 2026-02-15
