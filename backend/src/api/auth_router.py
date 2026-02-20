@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 
@@ -94,19 +95,23 @@ def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
             detail="Failed to register user"
         )
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 @router.post("/login")
 @limiter.limit("10/minute")
-def login(request: Request, email: str, password: str, db: Session = Depends(get_db)):
+def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
     """
     Authenticate user and return JWT token
     """
     try:
         log_request("POST", "/auth/login")
-        logger.info(f"Login attempt for email: {email}")
+        logger.info(f"Login attempt for email: {login_data.email}")
 
-        user = UserService.authenticate_user(db, email, password)
+        user = UserService.authenticate_user(db, login_data.email, login_data.password)
         if not user:
-            log_security_event("Failed login attempt", {"email": email})
+            log_security_event("Failed login attempt", {"email": login_data.email})
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password"
