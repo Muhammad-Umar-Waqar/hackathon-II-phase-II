@@ -1,4 +1,6 @@
 # Database Initialization Script
+import sys
+sys.path.insert(0, 'backend')
 
 from src.database import init_db
 from src.models.user import User
