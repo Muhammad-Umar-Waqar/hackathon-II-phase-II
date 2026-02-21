@@ -40,7 +40,10 @@ const RegisterPage = () => {
 
     try {
       // Call FastAPI register endpoint
-      const response = await fetch('http://localhost:8001/api/v1/auth/register', {
+
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001'
+      
+      const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
