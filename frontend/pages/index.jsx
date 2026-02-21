@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import TaskForm from '../src/components/TaskForm';
 import TaskList from '../src/components/TaskList';
@@ -7,6 +7,7 @@ const HomePage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const taskListRef = useRef(null);
 
   useEffect(() => {
     // Check if user is authenticated (client-side only)
@@ -34,6 +35,14 @@ const HomePage = () => {
     localStorage.removeItem('user_id');
     localStorage.removeItem('username');
     router.push('/login');
+  };
+
+  const handleTaskCreated = (newTask) => {
+    console.log('Task created:', newTask);
+    // Trigger TaskList refresh
+    if (taskListRef.current) {
+      taskListRef.current.refreshTasks();
+    }
   };
 
   if (loading) {
@@ -78,11 +87,12 @@ const HomePage = () => {
           <p className="text-gray-600 text-sm sm:text-base">Create, update, and track your tasks efficiently</p>
         </div>
 
-        <TaskForm />
+        <TaskForm onTaskCreated={handleTaskCreated} />
 
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mt-6">
           <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-800">Your Tasks</h2>
           <TaskList
+            ref={taskListRef}
             userId={user.id}
             onTaskUpdate={(updatedTask) => {
               console.log('Task updated:', updatedTask);

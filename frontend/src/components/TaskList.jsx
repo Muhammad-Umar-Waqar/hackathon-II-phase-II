@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import TaskItem from './TaskItem';
 import { taskAPI } from '../services/api';
 
-const TaskList = ({ userId, onTaskUpdate, onTaskDelete }) => {
+const TaskList = forwardRef(({ userId, onTaskUpdate, onTaskDelete }, ref) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,6 +24,11 @@ const TaskList = ({ userId, onTaskUpdate, onTaskDelete }) => {
       setLoading(false);
     }
   };
+
+  // Expose refreshTasks method to parent component
+  useImperativeHandle(ref, () => ({
+    refreshTasks: fetchTasks
+  }));
 
   const handleTaskUpdate = (taskId, updatedTask) => {
     setTasks(prevTasks =>
@@ -149,6 +154,8 @@ const TaskList = ({ userId, onTaskUpdate, onTaskDelete }) => {
       </div>
     </div>
   );
-};
+});
+
+TaskList.displayName = 'TaskList';
 
 export default TaskList;
