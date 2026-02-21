@@ -44,16 +44,16 @@ export default api;
 
 // Authentication endpoints
 export const authAPI = {
-  register: (userData) => api.post('/auth/register', userData),
-  login: (email, password) => api.post('/auth/login', { email, password }),
-  getCurrentUser: () => api.get('/auth/me'),
+  register: (userData) => api.post('/auth/register/', userData),
+  login: (email, password) => api.post('/auth/login/', { email, password }),
+  getCurrentUser: () => api.get('/auth/me/'),
 };
 
 // Task endpoints
 export const taskAPI = {
-  getAll: () => api.get('/tasks'),
-  getById: (id) => api.get(`/tasks/${id}`),
-  create: (taskData) => api.post('/tasks', taskData),
-  update: (id, taskData) => api.put(`/tasks/${id}`, taskData),
-  delete: (id) => api.delete(`/tasks/${id}`),
+  getAll: () => api.get('/tasks/'),
+  getById: (id) => api.get(`/tasks/${id}/`),
+  create: (taskData) => api.post('/tasks/', taskData),
+  update: (id, taskData) => api.put(`/tasks/${id}/`, taskData),
+  delete: (id) => api.delete(`/tasks/${id}/`),
 };
