@@ -42,8 +42,8 @@ const RegisterPage = () => {
       // Call FastAPI register endpoint
 
       const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://umarwaqar-full-stack-todo.hf.space'
-      
-      const response = await fetch(`${BACKEND_URL}/api/v1/auth/register/`, {
+
+      const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

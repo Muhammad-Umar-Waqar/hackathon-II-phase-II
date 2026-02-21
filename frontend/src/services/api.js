@@ -44,9 +44,9 @@ export default api;
 
 // Authentication endpoints
 export const authAPI = {
-  register: (userData) => api.post('/auth/register/', userData),
-  login: (email, password) => api.post('/auth/login/', { email, password }),
-  getCurrentUser: () => api.get('/auth/me/'),
+  register: (userData) => api.post('/auth/register', userData),
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  getCurrentUser: () => api.get('/auth/me'),
 };
 
 // Task endpoints
