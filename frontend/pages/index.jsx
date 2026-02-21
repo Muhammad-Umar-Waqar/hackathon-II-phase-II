@@ -1,25 +1,39 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import TaskForm from '../src/components/TaskForm';
 import TaskList from '../src/components/TaskList';
-import { useSession, signOut } from '@/lib/auth-client';
 
 const HomePage = () => {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (!isPending && !session) {
-      router.push('/login');
-    }
-  }, [session, isPending, router]);
+    // Check if user is authenticated
+    const token = localStorage.getItem('access_token');
+    const userId = localStorage.getItem('user_id');
+    const username = localStorage.getItem('username');
 
-  const handleLogout = async () => {
-    await signOut();
+    if (!token) {
+      router.push('/login');
+    } else {
+      setUser({
+        id: userId,
+        name: username,
+        email: username
+      });
+      setLoading(false);
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('username');
     router.push('/login');
   };
 
-  if (isPending) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -27,11 +41,9 @@ const HomePage = () => {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
-
-  const user = session.user;
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from '@/lib/auth-client';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -31,10 +32,28 @@ const LoginPage = () => {
     setError('');
 
     try {
-      await signIn.email({
-        email: formData.email,
-        password: formData.password,
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Login failed');
+      }
+
+      // Store token and user info in localStorage
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('user_id', data.user_id);
+      localStorage.setItem('username', data.username);
+
       // Redirect to home page after successful login
       router.push('/');
     } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { signUp } from '@/lib/auth-client';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -40,11 +41,24 @@ const RegisterPage = () => {
     setSuccess('');
 
     try {
-      await signUp.email({
-        email: formData.email,
-        password: formData.password,
-        name: formData.username,
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+        }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Registration failed');
+      }
+
       setSuccess('Registration successful! You can now log in.');
       setTimeout(() => {
         router.push('/login');

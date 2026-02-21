@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { authClient } from '@/lib/auth-client';
 
 // Create axios instance with base configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -12,12 +11,12 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token from Better Auth
+// Request interceptor to add auth token from localStorage
 api.interceptors.request.use(
-  async (config) => {
-    const session = await authClient.getSession();
-    if (session?.session?.token) {
-      config.headers.Authorization = `Bearer ${session.session.token}`;
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -31,7 +30,10 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid, redirect to login
+      // Token expired or invalid, clear storage and redirect to login
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('username');
       window.location.href = '/login';
     }
     return Promise.reject(error);
