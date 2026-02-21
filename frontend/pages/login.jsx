@@ -31,7 +31,7 @@ const LoginPage = () => {
 
     try {
       // Call FastAPI login endpoint
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://umarwaqar-full-stack-todo.hf.space';
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/login/`, {
         method: 'POST',
         headers: {
