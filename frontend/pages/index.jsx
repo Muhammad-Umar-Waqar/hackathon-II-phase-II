@@ -9,22 +9,25 @@ const HomePage = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem('access_token');
-    const userId = localStorage.getItem('user_id');
-    const username = localStorage.getItem('username');
+    // Check if user is authenticated (client-side only)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      const userId = localStorage.getItem('user_id');
+      const username = localStorage.getItem('username');
 
-    if (!token) {
-      router.push('/login');
-    } else {
-      setUser({
-        id: userId,
-        name: username,
-        email: username
-      });
-      setLoading(false);
+      if (!token) {
+        setLoading(false);
+        router.push('/login');
+      } else {
+        setUser({
+          id: userId,
+          name: username,
+          email: username
+        });
+        setLoading(false);
+      }
     }
-  }, [router]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');

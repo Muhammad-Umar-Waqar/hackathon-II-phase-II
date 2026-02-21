@@ -110,6 +110,8 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
         logger.info(f"Login attempt for email: {login_data.email}")
 
         user = UserService.authenticate_user(db, login_data.email, login_data.password)
+        logger.info(f"Authentication result: {user is not None}")
+
         if not user:
             log_security_event("Failed login attempt", {"email": login_data.email})
             raise HTTPException(
@@ -117,11 +119,13 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
                 detail="Incorrect email or password"
             )
 
+        logger.info(f"Creating access token for user_id={user.id}")
         # Create access token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             data={"sub": str(user.id)}, expires_delta=access_token_expires
         )
+        logger.info(f"Access token created successfully")
 
         logger.info(f"User logged in successfully: user_id={user.id}, email={login_data.email}")
         return {
@@ -133,6 +137,9 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Login exception: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         log_error(e, "login")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

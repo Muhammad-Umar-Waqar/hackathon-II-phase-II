@@ -100,7 +100,7 @@ app.include_router(task_router.router, prefix="/api/v1/tasks", tags=["tasks"])
 @limiter.limit("100/minute")
 def read_root(request: Request):
     logger.info("Health check endpoint accessed")
-    return {"message": "Todo API is running", "status": "healthy"}
+    return {"message": "Todo API is running", "status": "healthy", "version": "2.0"}
 
 if __name__ == "__main__":
     import uvicorn

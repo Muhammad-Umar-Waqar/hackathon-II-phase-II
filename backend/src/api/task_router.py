@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
 
@@ -12,14 +13,35 @@ from ..models.task import TaskCreate, TaskUpdate, TaskResponse
 from ..models.user import UserResponse
 from ..services.task_service import TaskService
 from ..services.user_service import UserService
-from ..auth.better_auth import verify_better_auth_session
 from ..utils.logger import logger, log_error, log_request
 
 load_dotenv()
 
+# JWT Configuration (same as auth_router)
+SECRET_KEY = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-change-in-production")
+ALGORITHM = "HS256"
+
 router = APIRouter()
-security = HTTPBearer(auto_error=False)
+security = HTTPBearer()
 limiter = Limiter(key_func=get_remote_address)
+
+def verify_token(token: str) -> str:
+    """
+    Verify and decode a JWT token
+    Returns user_id as string
+    """
+    try:
+        logger.info(f"Verifying token: {token[:20]}...")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        logger.info(f"Token decoded successfully, user_id: {user_id}")
+        if user_id is None:
+            logger.error("Token payload missing 'sub' field")
+            raise HTTPException(status_code=401, detail="Could not validate credentials")
+        return user_id
+    except JWTError as e:
+        logger.error(f"JWT verification failed: {str(e)}")
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 @router.get("/", response_model=List[TaskResponse])
 @limiter.limit("60/minute")
@@ -27,14 +49,17 @@ def get_tasks(
     request: Request,
     skip: int = 0,
     limit: int = 100,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Get all tasks for the authenticated user (Better Auth)
+    Get all tasks for the authenticated user (JWT)
     """
     try:
-        user_id = verify_better_auth_session(request)
+        logger.info(f"GET /tasks - Headers: {dict(request.headers)}")
+        logger.info(f"GET /tasks - Credentials: {credentials}")
+
+        user_id = verify_token(credentials.credentials)
         log_request("GET", "/tasks", user_id)
 
         tasks = TaskService.get_tasks_for_user(db, user_id, skip=skip, limit=limit)
@@ -43,6 +68,7 @@ def get_tasks(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Error in get_tasks: {str(e)}")
         log_error(e, "get_tasks")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -54,14 +80,14 @@ def get_tasks(
 def create_task(
     request: Request,
     task: TaskCreate,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Create a new task for the authenticated user (Better Auth)
+    Create a new task for the authenticated user (JWT)
     """
     try:
-        user_id = verify_better_auth_session(request)
+        user_id = verify_token(credentials.credentials)
         log_request("POST", "/tasks", user_id)
 
         # Validate status field
@@ -95,14 +121,14 @@ def create_task(
 def get_task(
     request: Request,
     task_id: int,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Get a specific task by ID for the authenticated user (Better Auth)
+    Get a specific task by ID for the authenticated user (JWT)
     """
     try:
-        user_id = verify_better_auth_session(request)
+        user_id = verify_token(credentials.credentials)
         log_request("GET", f"/tasks/{task_id}", user_id)
 
         task = TaskService.get_task_by_id(db, task_id, user_id)
@@ -127,14 +153,14 @@ def update_task(
     request: Request,
     task_id: int,
     task_update: TaskUpdate,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Update a specific task for the authenticated user (Better Auth)
+    Update a specific task for the authenticated user (JWT)
     """
     try:
-        user_id = verify_better_auth_session(request)
+        user_id = verify_token(credentials.credentials)
         log_request("PUT", f"/tasks/{task_id}", user_id)
 
         # Validate status field if provided
@@ -172,14 +198,14 @@ def update_task(
 def delete_task(
     request: Request,
     task_id: int,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Delete a specific task for the authenticated user (Better Auth)
+    Delete a specific task for the authenticated user (JWT)
     """
     try:
-        user_id = verify_better_auth_session(request)
+        user_id = verify_token(credentials.credentials)
         log_request("DELETE", f"/tasks/{task_id}", user_id)
 
         success = TaskService.delete_task(db, task_id, user_id)
