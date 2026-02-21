@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
+import { signIn } from '../lib/auth-client';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -32,27 +31,41 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+      // Use Better Auth for login
+      const result = await signIn.email({
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Login failed');
+      if (result.error) {
+        throw new Error(result.error.message || 'Login failed');
       }
 
-      // Store token and user info in localStorage
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('user_id', data.user_id);
-      localStorage.setItem('username', data.username);
+      // Store user info in localStorage for compatibility with existing code
+      if (result.data?.user) {
+        localStorage.setItem('user_id', result.data.user.id);
+        localStorage.setItem('username', result.data.user.name || result.data.user.email);
+      }
+
+      // Also login to FastAPI backend to get JWT token for API requests
+      try {
+        const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
+
+        if (backendResponse.ok) {
+          const backendData = await backendResponse.json();
+          localStorage.setItem('access_token', backendData.access_token);
+        }
+      } catch (backendError) {
+        console.warn('Backend login failed, but Better Auth succeeded:', backendError);
+        // Continue anyway - Better Auth is the primary auth system
+      }
 
       // Redirect to home page after successful login
       router.push('/');

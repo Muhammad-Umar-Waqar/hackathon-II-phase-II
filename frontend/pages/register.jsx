@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
+import { signUp } from '../lib/auth-client';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     email: '',
-    username: '',
+    name: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.username || !formData.password) {
+    if (!formData.email || !formData.name || !formData.password) {
       setError('Please fill in all fields');
       return;
     }
@@ -41,25 +40,34 @@ const RegisterPage = () => {
     setSuccess('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          username: formData.username,
-          password: formData.password,
-        }),
+      // Use Better Auth for registration
+      const result = await signUp.email({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Registration failed');
+      if (result.error) {
+        throw new Error(result.error.message || 'Registration failed');
       }
 
-      setSuccess('Registration successful! You can now log in.');
+      // Also register in FastAPI backend for JWT token support
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: formData.name,
+            email: formData.email,
+            password: formData.password
+          })
+        });
+      } catch (backendError) {
+        console.warn('Backend registration failed, but Better Auth succeeded:', backendError);
+        // Continue anyway - Better Auth is the primary auth system
+      }
+
+      setSuccess('Registration successful! Redirecting to login...');
       setTimeout(() => {
         router.push('/login');
       }, 2000);
@@ -133,17 +141,17 @@ const RegisterPage = () => {
               />
             </div>
             <div>
-              <label htmlFor="username" className="sr-only">Username</label>
+              <label htmlFor="name" className="sr-only">Name</label>
               <input
-                id="username"
-                name="username"
+                id="name"
+                name="name"
                 type="text"
-                autoComplete="username"
+                autoComplete="name"
                 required
-                value={formData.username}
+                value={formData.name}
                 onChange={handleChange}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
+                placeholder="Name"
               />
             </div>
             <div>

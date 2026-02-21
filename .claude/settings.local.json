@@ -46,7 +46,11 @@
       "Bash(findstr LISTENING)",
       "Bash(xargs:*)",
       "Bash(npm run build)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cd:*)",
+      "Bash(echo:*)",
+      "Bash(sleep 3:*)",
+      "Bash(findstr \":3000\\\\|:3001\")"
     ]
   }
 }

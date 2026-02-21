@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 import os
@@ -12,13 +12,13 @@ from ..models.task import TaskCreate, TaskUpdate, TaskResponse
 from ..models.user import UserResponse
 from ..services.task_service import TaskService
 from ..services.user_service import UserService
-from ..api.auth_router import verify_token
+from ..auth.better_auth import verify_better_auth_session
 from ..utils.logger import logger, log_error, log_request
 
 load_dotenv()
 
 router = APIRouter()
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 limiter = Limiter(key_func=get_remote_address)
 
 @router.get("/", response_model=List[TaskResponse])
@@ -27,21 +27,15 @@ def get_tasks(
     request: Request,
     skip: int = 0,
     limit: int = 100,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Get all tasks for the authenticated user
+    Get all tasks for the authenticated user (Better Auth)
     """
     try:
-        user_id = verify_token(credentials.credentials)
+        user_id = verify_better_auth_session(request)
         log_request("GET", "/tasks", user_id)
-
-        # Verify user exists
-        user = UserService.get_user_by_id(db, user_id)
-        if not user:
-            logger.warning(f"User not found: user_id={user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
 
         tasks = TaskService.get_tasks_for_user(db, user_id, skip=skip, limit=limit)
         logger.info(f"Retrieved {len(tasks)} tasks for user_id={user_id}")
@@ -60,21 +54,15 @@ def get_tasks(
 def create_task(
     request: Request,
     task: TaskCreate,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Create a new task for the authenticated user
+    Create a new task for the authenticated user (Better Auth)
     """
     try:
-        user_id = verify_token(credentials.credentials)
+        user_id = verify_better_auth_session(request)
         log_request("POST", "/tasks", user_id)
-
-        # Verify user exists
-        user = UserService.get_user_by_id(db, user_id)
-        if not user:
-            logger.warning(f"User not found: user_id={user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
 
         # Validate status field
         if task.status not in ["pending", "in-progress", "completed"]:
@@ -107,21 +95,15 @@ def create_task(
 def get_task(
     request: Request,
     task_id: int,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Get a specific task by ID for the authenticated user
+    Get a specific task by ID for the authenticated user (Better Auth)
     """
     try:
-        user_id = verify_token(credentials.credentials)
+        user_id = verify_better_auth_session(request)
         log_request("GET", f"/tasks/{task_id}", user_id)
-
-        # Verify user exists
-        user = UserService.get_user_by_id(db, user_id)
-        if not user:
-            logger.warning(f"User not found: user_id={user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
 
         task = TaskService.get_task_by_id(db, task_id, user_id)
         if not task:
@@ -145,21 +127,15 @@ def update_task(
     request: Request,
     task_id: int,
     task_update: TaskUpdate,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Update a specific task for the authenticated user
+    Update a specific task for the authenticated user (Better Auth)
     """
     try:
-        user_id = verify_token(credentials.credentials)
+        user_id = verify_better_auth_session(request)
         log_request("PUT", f"/tasks/{task_id}", user_id)
-
-        # Verify user exists
-        user = UserService.get_user_by_id(db, user_id)
-        if not user:
-            logger.warning(f"User not found: user_id={user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
 
         # Validate status field if provided
         if task_update.status and task_update.status not in ["pending", "in-progress", "completed"]:
@@ -196,21 +172,15 @@ def update_task(
 def delete_task(
     request: Request,
     task_id: int,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ):
     """
-    Delete a specific task for the authenticated user
+    Delete a specific task for the authenticated user (Better Auth)
     """
     try:
-        user_id = verify_token(credentials.credentials)
+        user_id = verify_better_auth_session(request)
         log_request("DELETE", f"/tasks/{task_id}", user_id)
-
-        # Verify user exists
-        user = UserService.get_user_by_id(db, user_id)
-        if not user:
-            logger.warning(f"User not found: user_id={user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
 
         success = TaskService.delete_task(db, task_id, user_id)
         if not success:

@@ -42,15 +42,15 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 def verify_token(token: str):
     """
-    Verify and decode a JWT token
+    Verify and decode a JWT token from Better Auth
     """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
+        user_id: str = payload.get("sub")  # Better Auth uses string IDs
         if user_id is None:
             log_security_event("Invalid token - missing user_id")
             raise HTTPException(status_code=401, detail="Could not validate credentials")
-        return user_id
+        return user_id  # Return as string
     except JWTError as e:
         log_security_event("JWT verification failed", {"error": str(e)})
         raise HTTPException(status_code=401, detail="Could not validate credentials")
@@ -123,7 +123,7 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
             data={"sub": str(user.id)}, expires_delta=access_token_expires
         )
 
-        logger.info(f"User logged in successfully: user_id={user.id}, email={email}")
+        logger.info(f"User logged in successfully: user_id={user.id}, email={login_data.email}")
         return {
             "access_token": access_token,
             "token_type": "bearer",

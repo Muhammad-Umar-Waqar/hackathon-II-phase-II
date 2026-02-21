@@ -10,13 +10,10 @@ class Task(SQLModel, table=True):
     title: str = Field(max_length=200)
     description: Optional[str] = Field(default=None, max_length=1000)
     status: str = Field(default="pending", index=True)  # pending, in-progress, completed
-    user_id: int = Field(foreign_key="users.id", index=True)
+    user_id: str = Field(index=True)  # Changed to str to match Better Auth
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     due_date: Optional[datetime] = Field(default=None, index=True)
-
-    # Relationship
-    user: Optional["User"] = Relationship(back_populates="tasks")
 
 class TaskCreate(SQLModel):
     """Schema for creating a new Task"""
@@ -38,7 +35,7 @@ class TaskResponse(SQLModel):
     title: str
     description: Optional[str]
     status: str
-    user_id: int
+    user_id: str  # Changed to str
     created_at: datetime
     updated_at: datetime
     due_date: Optional[datetime]
