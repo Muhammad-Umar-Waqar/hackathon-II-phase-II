@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import TaskForm from '../src/components/TaskForm';
-import TaskList from '../src/components/TaskList';
-import { useSession, signOut } from '../src/lib/auth-client';
+import TaskForm from '../components/TaskForm';
+import TaskList from '../components/TaskList';
+import { useSession, signOut } from '@/lib/auth-client';
 
 const HomePage = () => {
   const router = useRouter();
   const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push('/login');
+    }
+  }, [session, isPending, router]);
 
   const handleLogout = async () => {
     await signOut();
@@ -22,7 +28,6 @@ const HomePage = () => {
   }
 
   if (!session) {
-    router.push('/login');
     return null;
   }
 

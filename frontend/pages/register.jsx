@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { signUp } from '../src/lib/auth-client';
+import { signUp } from '@/lib/auth-client';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({

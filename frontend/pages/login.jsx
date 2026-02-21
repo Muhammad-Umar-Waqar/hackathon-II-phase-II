@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from '../src/lib/auth-client';
+import { signIn } from '@/lib/auth-client';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
